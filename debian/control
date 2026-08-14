@@ -1,0 +1,14 @@
+Source: flow-collector
+Section: admin
+Priority: extra
+Standards-Version: 4.5.0
+Maintainer: Hyperi <edgestream-support@hyperi.io>
+Build-Depends: debhelper-compat (= 13), tar
+Homepage: https://hyperi.io
+
+Package: flow-collector
+Architecture: amd64
+Pre-Depends: dpkg (>= 1.16.1), ${misc:Pre-Depends}
+Depends: ${misc:Depends}
+Description: flow-collector
+ Rust netflow collector supporting v5, v9 and IPFIX.

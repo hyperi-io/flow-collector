@@ -1,0 +1,2 @@
+# /etc/default/flow-collector
+CONFIG_FILE=/etc/flow-collector/config.yaml

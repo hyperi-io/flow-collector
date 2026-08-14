@@ -1,0 +1,40 @@
+# NetFlow Daemon Configuration
+#
+# This file configures the behavior of the NetFlow Daemon, including
+# network flow collection, data forwarding, and logging settings.
+# Modify the values below as needed to suit your network setup.
+
+netflow:
+  # Enable or disable NetFlow collection
+  enabled: false
+
+  # IP address to bind for NetFlow packet collection
+  # "0.0.0.0" listens on all available interfaces
+  address: "0.0.0.0"
+
+  # List of UDP ports to listen on for NetFlow traffic
+  ports: [2055, 2056, 9696]
+
+forwarding:
+  # Destination address to forward parsed NetFlow data
+  address: "127.0.0.1"
+
+  # Destination port for forwarding NetFlow data
+  port: 9000
+
+  # Protocol to use for forwarding data (Supported values: "udp", "tcp", "unix_stream", "unix_datagram")
+  protocol: "udp"
+
+  # Unix socket path (only used if protocol is "unix_stream")
+  # Set to None or a valid path, e.g., "/tmp/netflow.sock"
+  unix_socket_path: None
+
+logging:
+  # Path to the log file where NetFlow Daemon logs are stored
+  file: "/var/log/flow-collector/flow-collector.log"
+
+  # Number of log files to retain before rotating
+  keep: 5
+
+  # Maximum size (in bytes) of a log file before rotation occurs
+  maxsize: 1000000

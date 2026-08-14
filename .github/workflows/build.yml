@@ -1,0 +1,106 @@
+name: flow-collector
+
+env:
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+
+on:
+  push:
+    branches: ['**']
+    tags: ['**']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: arc-debian-4cpu
+    container:
+      image: debian:trixie-slim
+      options: --init
+
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      DEBEMAIL: "Hyperi <edgestream-support@hyperi.io>"
+      DEBFULLNAME: "Hyperi"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Build Environment
+        uses: hyperi-io/edge-shared-ci/setup-deps@90d182a78adfa7d12ece511b4efe6e550fe9845e
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9
+        with:
+          toolchain: stable
+
+      - name: make Rust accessible
+        run: |
+          CARGO_PATH=$(which cargo)
+          ln -sf "$CARGO_PATH" /usr/bin/cargo
+          ln -sf $(which rustc) /usr/bin/rustc
+          echo "CARGO_BIN_PATH=$CARGO_PATH" >> $GITHUB_ENV
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4
+        with:
+          shared-key: "flow-collector-native"
+
+      - name: Locate Cargo
+        run: |
+          echo "CARGO_BIN=$(rustup which cargo)" >> $GITHUB_ENV
+
+      - name: Lint Workflow
+        uses: hyperi-io/edge-shared-ci/workflow-lint@90d182a78adfa7d12ece511b4efe6e550fe9845e
+
+      - name: Security - Gitleaks
+        uses: hyperi-io/edge-shared-ci/gitleaks-scan@90d182a78adfa7d12ece511b4efe6e550fe9845e
+        env:
+          GIT_READY: "true"
+          GIT_DIR: ${{ github.workspace }}/.git
+          GIT_WORK_TREE: ${{ github.workspace }}
+
+      - name: Security - Semgrep SAST
+        uses: hyperi-io/edge-shared-ci/code-scan@90d182a78adfa7d12ece511b4efe6e550fe9845e
+
+      - name: Prepare Build Workspace
+        uses: hyperi-io/edge-shared-ci/prepare-env@90d182a78adfa7d12ece511b4efe6e550fe9845e
+
+      - name: Build Debian package
+        uses: hyperi-io/edge-shared-ci/build-deb@90d182a78adfa7d12ece511b4efe6e550fe9845e
+        env:
+          CARGO_BIN: ${{ env.CARGO_BIN }}
+
+      - name: Security - Trivy (Package Scan)
+        uses: hyperi-io/edge-shared-ci/trivy-scan@90d182a78adfa7d12ece511b4efe6e550fe9845e
+        with:
+          scan-path: './dist'
+          
+      - name: Deploy Package
+        if: success()
+        uses: hyperi-io/edge-shared-ci/deploy-deb@90d182a78adfa7d12ece511b4efe6e550fe9845e
+        with:
+          ssh-key: ${{ secrets.EDGESTREAM_REPO_SSH_KEY }}
+          known-hosts: ${{ secrets.EDGESTREAM_KNOWN_HOSTS }}
+          repo-user: ${{ vars.EDGESTREAM_REPO_USER }}
+          repo-host: ${{ vars.EDGESTREAM_REPO_HOST }}
+          incoming-path: ${{ vars.EDGESTREAM_REPO_INCOMING_PATH }}
+          update-script: ${{ vars.EDGESTREAM_REPO_UPDATE_SCRIPT }}
+
+      - name: Sync to R2
+        if: success()
+        uses: hyperi-io/edge-shared-ci/sync-repo-r2@90d182a78adfa7d12ece511b4efe6e550fe9845e
+        with:
+          ssh-key: ${{ secrets.EDGESTREAM_REPO_SSH_KEY }}
+          known-hosts: ${{ secrets.EDGESTREAM_KNOWN_HOSTS }}
+          repo-user: ${{ vars.EDGESTREAM_REPO_USER }}
+          repo-host: ${{ vars.EDGESTREAM_REPO_HOST }}
+          sync-script: ${{ vars.EDGESTREAM_REPO_SYNC_SCRIPT }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-endpoint-url: ${{ secrets.R2_ENDPOINT_URL }}

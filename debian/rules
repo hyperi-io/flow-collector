@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE = 1
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# If CARGO_BIN is passed from the YAML, use it. Fallback to 'cargo'
+CARGO := $(if $(CARGO_BIN),$(CARGO_BIN),cargo)
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	# Use the absolute path $(CARGO) instead of the command 'cargo'
+	$(CARGO) build --release
+
+override_dh_auto_install:
+	mkdir -p $(CURDIR)/debian/flow-collector/usr/sbin
+	mkdir -p $(CURDIR)/debian/flow-collector/etc/flow-collector
+	# Path is target/release/ because we are building natively
+	cp target/release/flow-collector \
+		$(CURDIR)/debian/flow-collector/usr/sbin/flow-collector
+	# Note: Ensure config.yaml is in your repository root
+	cp config.yaml \
+		$(CURDIR)/debian/flow-collector/etc/flow-collector/config.yaml
+
+override_dh_auto_clean:
+	# Skip clean to preserve the Rust cache
