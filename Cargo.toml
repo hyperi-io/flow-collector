@@ -12,7 +12,7 @@ serde_yaml = "0.9.34"
 tokio = { version = "1.53.1", features = ["full"] }
 simplelog = "0.12.2"
 ctrlc = "3.5.2"
-flexi_logger = "0.31.9"
+flexi_logger = "0.31.10"
 log = "0.4.33"
 futures = "0.3.33"
 bytes = "1.12.1"
