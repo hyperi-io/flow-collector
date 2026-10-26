@@ -1,7 +1,7 @@
 PRODUCT := flow-collector
 DEBEMAIL := Hyperi Support <edgestream-support@hyperi.io>
 CONTENTS := Netflow Collector - contact edgestream-support@hyperi.io for support enquiries
-MAJOR_VERSION ?= 0.1.0
+MAJOR_VERSION ?= 1.1.0
 
 # Normalize SOURCE_DATE_EPOCH to *integer seconds* (handles float/ms/µs/ns)
 EPOCHSEC := ${shell \

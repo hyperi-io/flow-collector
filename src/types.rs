@@ -88,11 +88,11 @@ impl<'de> Deserialize<'de> for Forwarding {
     where
         D: Deserializer<'de>,
     {
-        let mut map = std::collections::HashMap::<String, serde_yaml::Value>::deserialize(deserializer)?;
+        let mut map = std::collections::HashMap::<String, serde_yaml_ng::Value>::deserialize(deserializer)?;
 
         // Extract and validate `port`
         let port = match map.remove("port") {
-            Some(serde_yaml::Value::Number(num)) => {
+            Some(serde_yaml_ng::Value::Number(num)) => {
                 if let Some(port) = num.as_u64() {
                     if (2..=65535).contains(&port) {
                         port as u16
@@ -110,17 +110,17 @@ impl<'de> Deserialize<'de> for Forwarding {
         };
 
         let protocol: Protocol = match map.remove("protocol") {
-            Some(value) => serde_yaml::from_value(value).map_err(serde::de::Error::custom)?,
+            Some(value) => serde_yaml_ng::from_value(value).map_err(serde::de::Error::custom)?,
             None => return Err(serde::de::Error::custom("Missing 'protocol' field.")),
         };
 
         let address: String = match map.remove("address") {
-            Some(serde_yaml::Value::String(addr)) => addr,
+            Some(serde_yaml_ng::Value::String(addr)) => addr,
             _ => return Err(serde::de::Error::custom("Missing or invalid 'address' field.")),
         };
 
         let unix_socket_path: String = match map.remove("unix_socket_path") {
-            Some(serde_yaml::Value::String(path)) => path,
+            Some(serde_yaml_ng::Value::String(path)) => path,
             _ => "".to_string(),
         };
 

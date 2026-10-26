@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .or_else(|| env::var("CONFIG_FILE").ok().map(PathBuf::from))
         .unwrap_or_else(|| PathBuf::from("config.yaml"));
 
-    let config: types::NetflowConfig = serde_yaml::from_reader(File::open(config_file)?)?;
+    let config: types::NetflowConfig = serde_yaml_ng::from_reader(File::open(config_file)?)?;
     setup_logging(&config.logging)?;
 
     if config.netflow.enabled {

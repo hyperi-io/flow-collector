@@ -1,8 +1,9 @@
 # Flow Collector
 
 ## Overview
-A Rust-based NetFlow collector using the netflow_parser create. If you find this useful please
-support the crate author:
+A Rust-based NetFlow collector for Cisco V5, V7, V9, and IPFIX using the netflow_parser create.
+
+If you find this useful please support the crate author:
 - [Michael Miles Mileusnich](https://ko-fi.com/michaelmileusnich)
 
 The **Flow Collector** is a high-performance Rust-based NetFlow collector designed to:
